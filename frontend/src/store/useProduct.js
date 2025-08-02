@@ -2,7 +2,8 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { create } from "zustand";
 
-const BASE_URL = "http://localhost:3000/api/products";
+const BASE_URL =
+  import.meta.env.MODE === "development" ? "http://localhost:3000" : "";
 
 export const useProductStore = create((set, get) => ({
   products: [],
@@ -18,7 +19,7 @@ export const useProductStore = create((set, get) => ({
   },
 
   setFormData: (formData) => set({ formData }),
-  resetFrom: () =>
+  resetForm: () =>
     set({
       formData: {
         name: "",
@@ -33,9 +34,9 @@ export const useProductStore = create((set, get) => ({
 
     try {
       const { formData } = get();
-      await axios.post(`${BASE_URL}`, formData);
+      await axios.post(`${BASE_URL}/api/products`, formData);
       await get().fetchProducts();
-      get().resetFrom();
+      get().resetForm();
       toast.success("Product added successfully");
       document.getElementById("add_product_modal").close();
     } catch (error) {
@@ -50,7 +51,7 @@ export const useProductStore = create((set, get) => ({
     set({ loading: true });
     set({ error: null });
     try {
-      const res = await axios.get(`${BASE_URL}`);
+      const res = await axios.get(`${BASE_URL}/api/products`);
       set({ products: res.data.data, error: null });
     } catch (err) {
       if (err.status == 429)
@@ -67,7 +68,7 @@ export const useProductStore = create((set, get) => ({
     set({ loading: true });
     set({ error: null });
     try {
-      await axios.delete(`${BASE_URL}/${id}`);
+      await axios.delete(`${BASE_URL}/api/products/${id}`);
       set((prev) => ({
         products: prev.products.filter((product) => product.id !== id),
       }));
@@ -83,7 +84,7 @@ export const useProductStore = create((set, get) => ({
   fetchProduct: async (id) => {
     set({ loading: true });
     try {
-      const res = await axios.get(`${BASE_URL}/${id}`);
+      const res = await axios.get(`${BASE_URL}/api/products/${id}`);
       set({
         currentProduct: res.data.data,
         formData: res.data.data,
@@ -101,7 +102,7 @@ export const useProductStore = create((set, get) => ({
     set({ loading: true });
     try {
       const { formData } = get();
-      const res = await axios.put(`${BASE_URL}/${id}`, formData);
+      const res = await axios.put(`${BASE_URL}/api/products/${id}`, formData);
       set({
         currentProduct: res.data.data,
         error: null,
